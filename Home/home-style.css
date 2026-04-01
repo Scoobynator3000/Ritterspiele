@@ -28,8 +28,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
     padding: 10px 20px;
-    background-color: var(--black); /* dunkler Ritter-Style */
+    background-color: var(--black); 
     color: var(--white);
 }
 
@@ -62,7 +63,7 @@
 }
 
 .navbar-menu a:hover {
-    color: var(--red); /* goldener Ritter-Hauch */
+    color: var(--red); 
 }
 
 .navbar-right .btn {
@@ -216,7 +217,15 @@
 }
 
 .register-buttons .btn:hover {
-    background-color: var(--light-black);   /* Hover knallrot */
+    background-color: var(--light-black);   
     border-color: var(--white);
    transition: all 0.2s;
 }
+
+
+
+
+
+
+
+
