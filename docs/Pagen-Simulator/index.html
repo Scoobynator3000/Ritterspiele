@@ -1,138 +1,118 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | Ritterspiele-Dress Up</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
+<head>
+  <meta charset="utf-8">
+  <title>Unity Web Player | Ritterspiele-Dress Up</title>
+  <link rel="stylesheet" href="TemplateData/style.css">
 
-    <style>
-      body {
-        margin: 0;
-        background: #d9d9d9;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-      }
+  <style>
+    body {
+      margin: 0;
+      background: #d9d9d9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-      #unity-container {
-        width: 960px;
-        height: 540px;
-        position: relative;
-      }
+    /* 🔥 Container kleiner, aber korrektes Seitenverhältnis */
+    #unity-container {
+      width: min(90vw, 960px);
+      aspect-ratio: 16 / 9;
+      background: black;
+      position: relative;
+    }
 
-      #unity-canvas {
-        width: 100%;
-        height: 100%;
-        display: block;
-      }
-    </style>
-  </head>
+    #unity-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
 
-  <body>
+    #unity-loading-bar {
+      position: absolute;
+      width: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  </style>
+</head>
 
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas"></canvas>
+<body>
 
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-      </div>
+  <div id="unity-container">
+    <canvas id="unity-canvas"></canvas>
 
-      <div id="unity-warning"></div>
-
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">Ritterspiele-Dress Up</div>
+    <div id="unity-loading-bar">
+      <div id="unity-progress-bar-empty">
+        <div id="unity-progress-bar-full"></div>
       </div>
     </div>
+  </div>
 
-    <script>
-      var canvas = document.querySelector("#unity-canvas");
+  <script>
+    var canvas = document.querySelector("#unity-canvas");
 
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
+    function unityShowBanner(msg, type) {
+      console.log(msg);
+    }
 
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? "block" : "none";
-        }
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/Pagen-Simulator.loader.js";
 
-        var div = document.createElement("div");
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
+    var config = {
+      dataUrl: buildUrl + "/Pagen-Simulator.data",
+      frameworkUrl: buildUrl + "/Pagen-Simulator.framework.js",
+      codeUrl: buildUrl + "/Pagen-Simulator.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "Ritterspiele-Dress Up",
+      productVersion: "1.0",
+      showBanner: unityShowBanner,
 
-        if (type == "error") {
-          div.style = "background: red; padding: 10px;";
-        } else {
-          if (type == "warning") div.style = "background: yellow; padding: 10px;";
-          setTimeout(function () {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
+      matchWebGLToCanvasSize: true,
+      devicePixelRatio: 1
+    };
 
-        updateBannerVisibility();
-      }
+    // 🔥 DAS ist der wichtige Part
+    function resizeCanvas() {
+      const container = document.getElementById("unity-container");
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Pagen-Simulator.loader.js";
+      const width = container.clientWidth;
+      const height = container.clientHeight;
 
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/Pagen-Simulator.data",
-        frameworkUrl: buildUrl + "/Pagen-Simulator.framework.js",
-        codeUrl: buildUrl + "/Pagen-Simulator.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "Ritterspiele-Dress Up",
-        productVersion: "1.0",
-        showBanner: unityShowBanner,
+      // visuelle Größe
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
 
-        // 🔥 WICHTIG: verhindert Scaling/Cropping Bugs
-        matchWebGLToCanvasSize: true
-      };
+      // interne Unity-Auflösung bleibt Full HD
+      canvas.width = 1920;
+      canvas.height = 1080;
+    }
 
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
 
-        var meta = document.createElement("meta");
-        meta.name = "viewport";
-        meta.content =
-          "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
-        document.head.appendChild(meta);
+    document.querySelector("#unity-loading-bar").style.display = "block";
 
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
-      }
+    var script = document.createElement("script");
+    script.src = loaderUrl;
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
+    script.onload = () => {
+      createUnityInstance(canvas, config, (progress) => {
+        document.querySelector("#unity-progress-bar-full").style.width =
+          100 * progress + "%";
+      })
+      .then((unityInstance) => {
+        document.querySelector("#unity-loading-bar").style.display = "none";
+      })
+      .catch((message) => {
+        alert(message);
+      });
+    };
 
-      var script = document.createElement("script");
-      script.src = loaderUrl;
+    document.body.appendChild(script);
+  </script>
 
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width =
-            100 * progress + "%";
-        })
-          .then((unityInstance) => {
-            document.querySelector("#unity-loading-bar").style.display = "none";
-
-            document.querySelector("#unity-fullscreen-button").onclick = () => {
-              unityInstance.SetFullscreen(1);
-            };
-          })
-          .catch((message) => {
-            alert(message);
-          });
-      };
-
-      document.body.appendChild(script);
-    </script>
-
-  </body>
+</body>
 </html>
