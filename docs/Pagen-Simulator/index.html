@@ -6,9 +6,33 @@
     <title>Unity Web Player | Ritterspiele-Dress Up</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
+
+    <style>
+      body {
+        margin: 0;
+        background: #d9d9d9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      #unity-container {
+        width: 960px;
+        height: 540px;
+        position: relative;
+      }
+
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+    </style>
   </head>
 
   <body>
+
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas"></canvas>
 
@@ -67,7 +91,10 @@
         companyName: "DefaultCompany",
         productName: "Ritterspiele-Dress Up",
         productVersion: "1.0",
-        showBanner: unityShowBanner
+        showBanner: unityShowBanner,
+
+        // 🔥 WICHTIG: verhindert Scaling/Cropping Bugs
+        matchWebGLToCanvasSize: true
       };
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
@@ -76,39 +103,10 @@
         meta.name = "viewport";
         meta.content =
           "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
-        document.getElementsByTagName("head")[0].appendChild(meta);
+        document.head.appendChild(meta);
 
         document.querySelector("#unity-container").className = "unity-mobile";
         canvas.className = "unity-mobile";
-
-      } else {
-
-        // ✅ FIT GAME INS WINDOW (kleiner als Fenster, aber komplett sichtbar)
-        function resizeCanvas() {
-          const maxW = window.innerWidth * 0.9;
-          const maxH = window.innerHeight * 0.9;
-
-          const targetRatio = 16 / 9;
-
-          let width = maxW;
-          let height = width / targetRatio;
-
-          if (height > maxH) {
-            height = maxH;
-            width = height * targetRatio;
-          }
-
-          canvas.style.width = width + "px";
-          canvas.style.height = height + "px";
-
-          canvas.style.position = "absolute";
-          canvas.style.left = "50%";
-          canvas.style.top = "50%";
-          canvas.style.transform = "translate(-50%, -50%)";
-        }
-
-        window.addEventListener("resize", resizeCanvas);
-        resizeCanvas();
       }
 
       document.querySelector("#unity-loading-bar").style.display = "block";
@@ -135,5 +133,6 @@
 
       document.body.appendChild(script);
     </script>
+
   </body>
 </html>
